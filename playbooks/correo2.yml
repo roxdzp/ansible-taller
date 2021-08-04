@@ -39,23 +39,25 @@
     lineinfile:
       path: /etc/dovecot/dovecot.conf
       line: 'protocols= imap pop3 lmtp'
+      state: present
 
   - name: copy dovecot mail configuration
     copy: 
-      src: ./10-mail.conf
+      src: ./templates/10-mail.conf
       dest: /etc/dovecot/conf.d/10-mail.conf
+      force: yes
     notify: 
-    - restart dovecot
+      - Restart dovecot
 
    - name: Dovecot running and enabled
     service:
       name: dovecot
       state: started
-      enabled: true
+      enabled: yes
 
   - name: Configure squirrelmail
     template:
-      src: ./squirrelmail.conf.j2
+      src: ./templates/squirrelmail.conf.j2
       dest: /etc/squirrelmail/config.php
       owner: root
       group: root
@@ -65,18 +67,18 @@
     service:
       name: httpd
       state: started
-      enabled: true
+      enabled: yes
       
   - name: open firewall ports       
     firewalld:
-      service: "{{item}}"
+      service: "{{ item }}"
       state: enabled
       permanent: yes
       immediate: yes
     loop:
-    - smtp
-    - imap
-    - http
+      - smtp
+      - imap
+      - http
 
   handlers: 
   - name: Restart postfix
